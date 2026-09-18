@@ -1,0 +1,16 @@
+# env
+.env
+.env-prod
+
+# docs, plans, etc.
+*.doc
+*.docx
+*.ppt
+*.pdf
+
+# build and node_modules folders
+/build/
+/node_modules/
+
+# claude folders/files
+.claude/
