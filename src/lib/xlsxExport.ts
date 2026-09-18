@@ -1,9 +1,10 @@
-import * as XLSX from "xlsx-js-style";
-
 /** Export column headers + row-array data as an .xlsx file. `rows` is an
  *  array of arrays (one row per entry), matching the `listfetchall` shape
- *  most report tables already carry. */
-export function exportXlsx(colnames: string[], rows: unknown[][], filename = "data.xlsx") {
+ *  most report tables already carry. The xlsx library is loaded lazily on
+ *  first use, hence async. */
+export async function exportXlsx(colnames: string[], rows: unknown[][], filename = "data.xlsx") {
+  // Loaded on demand: xlsx-js-style is by far the largest dependency.
+  const XLSX = await import("xlsx-js-style");
   const aoa = [colnames, ...rows];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   const wb = XLSX.utils.book_new();

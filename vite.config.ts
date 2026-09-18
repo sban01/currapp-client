@@ -12,6 +12,20 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/app' : '/',
   build: {
     outDir: 'build',
+    rolldownOptions: {
+      output: {
+        // Split the always-needed vendor libraries out of the entry chunk so they
+        // cache independently of app code. Page code and xlsx are split by the
+        // lazy imports in src/config/menu.tsx and src/lib/xlsxExport.ts.
+        codeSplitting: {
+          groups: [
+            { name: 'vendor-react', test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/, priority: 30 },
+            { name: 'vendor-msal', test: /node_modules[\\/]@azure[\\/]/, priority: 20 },
+            { name: 'vendor-mui', test: /node_modules[\\/](@mui|@emotion)[\\/]/, priority: 10 },
+          ],
+        },
+      },
+    },
   },
   server: {
     port: 3000,

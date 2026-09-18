@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import type { ReactNode } from "react";
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { ErrorBoundary } from "react-error-boundary";
 import type { FallbackProps } from "react-error-boundary";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -42,6 +43,7 @@ export default function App() {
         <GlobalsProvider>
           <StalenessMonitor />
           <Layout>
+            <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", p: 6 }}><CircularProgress /></Box>}>
             <Routes>
               {routeLeaves().map((r) => (
                 <Route
@@ -53,6 +55,7 @@ export default function App() {
               <Route path="/" element={<Navigate to="/progress/schedule" replace />} />
               <Route path="*" element={<Navigate to="/progress/schedule" replace />} />
             </Routes>
+            </Suspense>
           </Layout>
         </GlobalsProvider>
       </AuthGateway>

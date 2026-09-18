@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components -- lazy page consts live beside the menu config; HMR full-reload is fine here */
+import { lazy } from "react";
 import type { ReactNode } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventNoteIcon from "@mui/icons-material/EventNote";
@@ -12,15 +14,20 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import SummarizeOutlinedIcon from "@mui/icons-material/SummarizeOutlined";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import ChecklistIcon from "@mui/icons-material/Checklist";
-import { LOProgressPage, MissingNamesPage, ScheduleProgressPage } from "../page-components/progress/ProgressPage";
-import { ScheduleActivitiesPage, ScheduleMainPage } from "../page-components/schedule/SchedulePage";
-import SchedulePersonalPage from "../page-components/schedule/SchedulePersonalPage";
-import ObjectivesPage from "../page-components/objectives/ObjectivesPage";
-import ObjectivesSearchPage from "../page-components/objectives/ObjectivesSearchPage";
-import ObjectivesTracePage from "../page-components/objectives/ObjectivesTracePage";
-import AdminPage from "../page-components/admin/AdminPage";
-import ScheduleAdminPage from "../page-components/scheduleadmin/ScheduleAdminPage";
-import CMAdminPage from "../page-components/cmadmin/CMAdminPage";
+// Pages are code-split: each route's module is fetched on first visit (App wraps
+// the routes in <Suspense>). Named-export pages are adapted to lazy()'s default.
+const LOProgressPage = lazy(() => import("../page-components/progress/ProgressPage").then((m) => ({ default: m.LOProgressPage })));
+const MissingNamesPage = lazy(() => import("../page-components/progress/ProgressPage").then((m) => ({ default: m.MissingNamesPage })));
+const ScheduleProgressPage = lazy(() => import("../page-components/progress/ProgressPage").then((m) => ({ default: m.ScheduleProgressPage })));
+const ScheduleActivitiesPage = lazy(() => import("../page-components/schedule/SchedulePage").then((m) => ({ default: m.ScheduleActivitiesPage })));
+const ScheduleMainPage = lazy(() => import("../page-components/schedule/SchedulePage").then((m) => ({ default: m.ScheduleMainPage })));
+const SchedulePersonalPage = lazy(() => import("../page-components/schedule/SchedulePersonalPage"));
+const ObjectivesPage = lazy(() => import("../page-components/objectives/ObjectivesPage"));
+const ObjectivesSearchPage = lazy(() => import("../page-components/objectives/ObjectivesSearchPage"));
+const ObjectivesTracePage = lazy(() => import("../page-components/objectives/ObjectivesTracePage"));
+const AdminPage = lazy(() => import("../page-components/admin/AdminPage"));
+const ScheduleAdminPage = lazy(() => import("../page-components/scheduleadmin/ScheduleAdminPage"));
+const CMAdminPage = lazy(() => import("../page-components/cmadmin/CMAdminPage"));
 import type { Role } from "../types";
 
 /**

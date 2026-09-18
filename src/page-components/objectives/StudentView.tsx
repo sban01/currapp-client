@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { Button, Typography } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import * as XLSX from "xlsx-js-style";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "../../components/DataTable";
 import { reportsApi } from "../../lib/apiClient";
@@ -42,7 +41,8 @@ export function StudentView({ group, queryName, params, caption }: { group: Grou
     return out;
   }, [data]);
 
-  const exportPretty = () => {
+  const exportPretty = async () => {
+    const XLSX = await import("xlsx-js-style");
     const ws = XLSX.utils.json_to_sheet([]);
     XLSX.utils.sheet_add_aoa(ws, [[caption]]);
     const offset = 2;

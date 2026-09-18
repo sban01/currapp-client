@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx-js-style";
+import type { WorkBook } from "xlsx-js-style";
 import { reportsApi } from "./apiClient";
 import { toColumnsAndRows } from "./reportRows";
 
@@ -11,7 +11,8 @@ const LO_TEMPLATE_URL = "https://cai.sgu.edu/resources/LOtemplate.xlsx";
  *  template's 'objectives' sheet. Returns an error string on failure, or
  *  `true` on success (a file download is triggered as a side effect). */
 export async function saveLoTemplateXlsx(queryName: string, params: Record<string, unknown>): Promise<true | string> {
-  let wb: XLSX.WorkBook;
+  const XLSX = await import("xlsx-js-style");
+  let wb: WorkBook;
   let columns: string[];
   let rows: unknown[][];
   try {
