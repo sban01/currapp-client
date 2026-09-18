@@ -12,9 +12,11 @@ import { toColumnsAndRows } from "../lib/reportRows";
 import { exportXlsx } from "../lib/xlsxExport";
 import type { Group } from "../config/cache";
 
-interface TreeNode {
+export interface TreeNode {
   label: string;
   children: TreeNode[];
+  /** Optional text lines shown when a childless node is unfolded (e.g. LOs). */
+  details?: string[];
 }
 
 /** A report row's cells are joined with '!' (e.g. "MED1!M1!LEC!Intro (3)").
@@ -41,17 +43,20 @@ function buildTree(rows: string[]): TreeNode[] {
   return roots;
 }
 
-function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) {
-  const [open, setOpen] = useState(true);
+export function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) {
   const hasChildren = node.children.length > 0;
+  const hasDetails = !hasChildren && (node.details?.length ?? 0) > 0;
+  const expandable = hasChildren || hasDetails;
+  // Branches start unfolded; detail lines start folded behind their count.
+  const [open, setOpen] = useState(!hasDetails);
   return (
     <>
       <ListItemButton
         dense
         sx={{ pl: 1 + depth * 2.5 }}
-        onClick={() => hasChildren && setOpen((o) => !o)}
+        onClick={() => expandable && setOpen((o) => !o)}
       >
-        {hasChildren ? (
+        {expandable ? (
           <ListItemIcon sx={{ minWidth: 24 }}>
             {open ? <ExpandMoreIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
           </ListItemIcon>
@@ -67,6 +72,18 @@ function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) {
           ))}
         </List>
       )}
+      {hasDetails && open && (
+        <List disablePadding>
+          {node.details!.map((line, idx) => (
+            <ListItemText
+              key={idx}
+              sx={{ pl: 1 + (depth + 1) * 2.5 + 3, pr: 1, my: 0.25 }}
+              primary={line}
+              slotProps={{ primary: { sx: { fontSize: 13 } } }}
+            />
+          ))}
+        </List>
+      )}
     </>
   );
 }
@@ -74,7 +91,7 @@ function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) {
 /** Column/GROUP-BY picker for a flexquery — a simplified stand-in for
  *  legacy's drag-and-drop reorder list (components/dnd/dndLists.jsx):
  *  checking a column appends it to the display order, unchecking removes it. */
-function ColumnPicker({
+export function ColumnPicker({
   allVars,
   displayed,
   onChange,

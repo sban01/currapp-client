@@ -16,6 +16,7 @@
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@mui/x-date-pickers": "^9.2.0",
+    "@svar-ui/react-calendar": "^2.7.1",
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.18.1",
     "dayjs": "^1.11.13",

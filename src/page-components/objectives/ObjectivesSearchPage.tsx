@@ -3,6 +3,7 @@ import {
   Autocomplete, Box, Button, Checkbox, FormControlLabel, TextField, Tooltip, Typography,
 } from "@mui/material";
 import { FetchDataTable } from "../../components/DataTable";
+import { LoTreeView } from "../../components/LoTreeView";
 import { TreeView } from "../../components/TreeView";
 import { parseSearchString } from "../../lib/searchQuery";
 import { useGlobals } from "../../lib/GlobalsContext";
@@ -35,7 +36,9 @@ export default function ObjectivesSearchPage() {
   };
 
   let query: string;
-  if (searchIn === SEARCH_IN_OPTIONS[0]) query = viewType === "tree" ? "obj_searchLOs_graph1" : "obj_searchLOs";
+  // The LO-text tree is built client-side from obj_searchLOs (see LoTreeView),
+  // so both views of an LO search use that one stored query.
+  if (searchIn === SEARCH_IN_OPTIONS[0]) query = "obj_searchLOs";
   else if (searchIn === SEARCH_IN_OPTIONS[1]) query = viewType === "tree" ? "obj_searchTitles_graph1" : "obj_searchTitles";
   else query = viewType === "tree" ? "obj_searchHLLOs_graph" : "obj_searchHLLOs";
 
@@ -109,7 +112,12 @@ export default function ObjectivesSearchPage() {
       {submitted && viewType === "table" && (
         <FetchDataTable group="objectives" queryName={query} params={params} caption={caption} />
       )}
-      {submitted && viewType === "tree" && <TreeView group="objectives" queryName={query} params={params} />}
+      {submitted && viewType === "tree" && searchIn === SEARCH_IN_OPTIONS[0] && (
+        <LoTreeView group="objectives" queryName={query} params={params} root={submitted} />
+      )}
+      {submitted && viewType === "tree" && searchIn !== SEARCH_IN_OPTIONS[0] && (
+        <TreeView group="objectives" queryName={query} params={params} />
+      )}
     </Box>
   );
 }

@@ -7,12 +7,13 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { FetchDataTable } from "../../components/DataTable";
+import { ScheduleCalendar } from "../../components/ScheduleCalendar";
 import { reportsApi } from "../../lib/apiClient";
 import { toColumnsAndRows } from "../../lib/reportRows";
 import { saveIcal } from "../../lib/saveIcal";
 import { useGlobals } from "../../lib/GlobalsContext";
 
-type View = "schedule" | "workload";
+type View = "schedule" | "workload" | "calendar";
 
 /** Personal schedule / workload view + ical download, by term or date range.
  *  Ported from pages/schedule/schedulepersonal.jsx. */
@@ -50,9 +51,11 @@ export default function SchedulePersonalPage() {
   if (isPending) return <Typography variant="body2">Loading name list…</Typography>;
 
   const paddedName = `%${name ?? ""}%`;
+  // The calendar view is drawn from the same report as the schedule table.
+  const reportView = view === "calendar" ? "schedule" : view;
   const params = useDateRange
-    ? { query: `scd_personal_${view}_dtrng`, start, end: end.add(1, "day"), name: paddedName }
-    : { query: `scd_personal_${view}`, termY, termM, name: paddedName };
+    ? { query: `scd_personal_${reportView}_dtrng`, start, end: end.add(1, "day"), name: paddedName }
+    : { query: `scd_personal_${reportView}`, termY, termM, name: paddedName };
   const caption =
     (view === "workload" ? "Workload summary (n = number of unique activities, repeats are not counted)" : "Personal schedule") +
     (useDateRange
@@ -99,6 +102,17 @@ export default function SchedulePersonalPage() {
             variant="outlined"
             onClick={() =>
               requireName(() => {
+                setView("calendar");
+                setShowResults(true);
+              })
+            }
+          >
+            <b>calendar view</b>
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              requireName(() => {
                 setView("schedule");
                 setShowResults(true);
               })
@@ -130,7 +144,10 @@ export default function SchedulePersonalPage() {
         </Box>
       </LocalizationProvider>
       {message && <Typography variant="body2">{message}</Typography>}
-      {showResults && !message && (
+      {showResults && !message && view === "calendar" && (
+        <ScheduleCalendar group="schedule" queryName={params.query} params={params} caption={caption} />
+      )}
+      {showResults && !message && view !== "calendar" && (
         <FetchDataTable group="schedule" queryName={params.query} params={params} caption={caption} />
       )}
     </Box>
