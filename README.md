@@ -1,6 +1,6 @@
 # currapp-client
 
-React + Vite frontend for **Curriculum Affairs** (CAI). Served at `/currapp`,
+React + Vite frontend for **SOM Curriculum App** (by CAI). Served at `/currapp`,
 proxied in dev to the FastAPI backend (`../currapp-api`) on port 8000. A
 from-scratch port of a legacy Django-templated React app
 (`../../webscripts/currapp`), rebuilt against this repo's own backend and the
