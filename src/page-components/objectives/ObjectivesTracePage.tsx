@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MultiSelect } from "../../components/MultiSelect";
 import type { MultiSelectState } from "../../components/MultiSelect";
 import { FetchDataTable } from "../../components/DataTable";
-import { TreeView } from "../../components/TreeView";
+import { LoTreeView } from "../../components/LoTreeView";
 import { reportsApi } from "../../lib/apiClient";
 import { toColumnsAndRows } from "../../lib/reportRows";
 import { useGlobals } from "../../lib/GlobalsContext";
@@ -12,12 +12,19 @@ import { useGlobals } from "../../lib/GlobalsContext";
 const SELECT_OPTIONS = ["program objective", "course objective", "module objective"];
 const SELECT_QUERIES = ["obj_getProgramObjectives", "obj_getCourseObjectives", "obj_getModuleObjectives"];
 const TABLE_QUERIES = ["obj_tablePOtrace", "obj_tableCOtrace", "obj_tableMOtrace"];
-const TREE_QUERIES = ["obj_graphPOtrace1", "obj_graphCOtrace1", "obj_graphMOtrace1"];
+// Tree view groups the one-row-per-LO table query client-side, by these columns
+// (each objective column also shows its `<column>_name`), and unfolds the LO text.
+const TREE_COLUMNS = [
+  ["program_objective", "course_objective", "module_objective", "discipline", "type", "lecture_title", "DLA_title"],
+  ["course_objective", "module_objective", "discipline", "type", "lecture_title", "DLA_title"],
+  ["module_objective", "discipline", "type", "lecture_title", "DLA_title"],
+];
+const treeDefaults = (cols: string[]) => [...cols.filter((c) => c !== "DLA_title"), "count"];
 
 /** Trace a program/course/module objective through discipline and activity
  *  type down to lecture/LO level. Ported from pages/objectives/hltrace.jsx
- *  (the Observable-Plot cluster diagram is replaced by components/TreeView's
- *  collapsible tree list — see that file's docstring). */
+ *  (the Observable-Plot cluster diagram is replaced by components/LoTreeView's
+ *  collapsible tree list, whose lecture nodes unfold to the LO text). */
 export default function ObjectivesTracePage() {
   const { termY, termM } = useGlobals();
   const paramStub = { termM, termY };
@@ -62,7 +69,14 @@ export default function ObjectivesTracePage() {
       )}
       {stage === 2 && (
         <Box sx={{ mt: 2 }}>
-          <TreeView group="objectives" queryName={TREE_QUERIES[selector.idx1]} params={params} />
+          <LoTreeView
+            key={selector.idx1}
+            group="objectives"
+            queryName={TABLE_QUERIES[selector.idx1]}
+            params={params}
+            columns={TREE_COLUMNS[selector.idx1]}
+            defaultDisplayed={treeDefaults(TREE_COLUMNS[selector.idx1])}
+          />
         </Box>
       )}
     </Box>

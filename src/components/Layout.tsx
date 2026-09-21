@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { MouseEvent } from "react";
 import {
   AppBar, Avatar, Autocomplete, Box, Collapse, Drawer, IconButton, List, ListItemButton,
-  ListItemIcon, ListItemText, Menu, MenuItem, TextField, Toolbar, Typography,
+  ListItemIcon, ListItemText, Menu, MenuItem, Paper, TextField, Toolbar, Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -66,7 +66,10 @@ function NavList({ items, role, depth = 0 }: { items: NavItem[]; role?: Role; de
 function TermSelect() {
   const { termY, termM, setTermY, setTermM } = useGlobals();
   return (
-    <Box sx={{ display: "flex", gap: 1 }}>
+    <Paper
+      elevation={2}
+      sx={{ display: "flex", gap: 1, px: 1.5, py: 1, bgcolor: "background.paper", borderRadius: 2 }}
+    >
       <Autocomplete
         id="termM"
         options={TERM_MONTHS}
@@ -87,7 +90,7 @@ function TermSelect() {
         sx={{ width: 110 }}
         onChange={(e) => setTermY(Number(e.target.value))}
       />
-    </Box>
+    </Paper>
   );
 }
 
@@ -122,18 +125,33 @@ export default function Layout({ children }: { children: ReactNode }) {
           bgcolor: alpha(t.palette.primary.main, 0.15),
           color: "text.primary",
           borderBottom: 1,
-          borderColor: alpha(t.palette.primary.main, 0.3),
+          borderColor: alpha(t.palette.primary.main, 0.15),
         })}
       >
         <Toolbar sx={{ gap: 2 }}>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-            SOM Curriculum App
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-            <TermSelect />
+          <Box
+            component="a"
+            href="https://cai.sgu.edu"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="CAi"
+            sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}
+          >
+            <Box
+              component="img"
+              src={`${import.meta.env.BASE_URL}logo_cai.svg`}
+              alt="CAi"
+              sx={{ height: 55, display: "block" }}
+            />
           </Box>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <Typography variant="h6" component="div" sx={{fontSize: 30, fontWeight: 600, whiteSpace: "nowrap" }}>
+              SOM Curriculum App
+            </Typography>
+          </Box>
+          <TermSelect />
           <IconButton onClick={openMenu} size="small">
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main", fontSize: 14 }}>
+            <Avatar sx={{ width: 45, height: 45, bgcolor: "secondary.main", fontSize: 24 }}>
               {getInitials(displayName)}
             </Avatar>
           </IconButton>

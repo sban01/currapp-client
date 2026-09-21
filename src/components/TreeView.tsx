@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import {
-  Box, Button, Checkbox, CircularProgress, FormControlLabel, FormGroup, List, ListItemButton,
-  ListItemIcon, ListItemText, Popover, Typography,
+  Box, Button, Checkbox, Chip, CircularProgress, FormControlLabel, FormGroup, List, ListItemButton,
+  ListItemIcon, ListItemText, Paper, Popover, Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -43,17 +44,47 @@ function buildTree(rows: string[]): TreeNode[] {
   return roots;
 }
 
+/** Trailing " (n)" counts fused onto a label are shown as a small chip. */
+const COUNT_RE = /^(.*?)\s*\((\d+)\)$/;
+
+function NodeLabel({ label, depth }: { label: string; depth: number }) {
+  const m = COUNT_RE.exec(label);
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Typography
+        component="span"
+        sx={{ fontSize: depth === 0 ? 15 : 13.5, fontWeight: depth === 0 ? 700 : depth === 1 ? 600 : 400 }}
+      >
+        {m ? m[1] : label}
+      </Typography>
+      {m && <Chip size="small" label={m[2]} sx={{ height: 18, fontSize: 11, fontWeight: 600 }} />}
+    </Box>
+  );
+}
+
+/** One tree node. Top-level nodes are outlined cards with a tinted bold
+ *  header, second-level nodes are semibold and divided by hairlines, deeper
+ *  levels are plain; LO detail lines sit in a shaded block. */
 export function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) {
   const hasChildren = node.children.length > 0;
   const hasDetails = !hasChildren && (node.details?.length ?? 0) > 0;
   const expandable = hasChildren || hasDetails;
   // Branches start unfolded; detail lines start folded behind their count.
   const [open, setOpen] = useState(!hasDetails);
-  return (
+
+  const body = (
     <>
       <ListItemButton
         dense
-        sx={{ pl: 1 + depth * 2.5 }}
+        sx={(t) => ({
+          pl: 1 + depth * 2.5,
+          py: depth === 0 ? 1 : 0.5,
+          ...(depth === 0 && {
+            bgcolor: alpha(t.palette.primary.main, 0.08),
+            borderBottom: open && expandable ? 1 : 0,
+            borderColor: "divider",
+          }),
+        })}
         onClick={() => expandable && setOpen((o) => !o)}
       >
         {expandable ? (
@@ -63,7 +94,7 @@ export function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) 
         ) : (
           <Box sx={{ width: 24 }} />
         )}
-        <ListItemText primary={node.label} slotProps={{ primary: { sx: { fontSize: 13 } } }} />
+        <ListItemText disableTypography primary={<NodeLabel label={node.label} depth={depth} />} />
       </ListItemButton>
       {hasChildren && open && (
         <List disablePadding>
@@ -73,18 +104,48 @@ export function TreeNodeRow({ node, depth }: { node: TreeNode; depth: number }) 
         </List>
       )}
       {hasDetails && open && (
-        <List disablePadding>
+        <Box sx={{ bgcolor: (t) => alpha(t.palette.text.primary, 0.03) }}>
           {node.details!.map((line, idx) => (
-            <ListItemText
+            <Typography
               key={idx}
-              sx={{ pl: 1 + (depth + 1) * 2.5 + 3, pr: 1, my: 0.25 }}
-              primary={line}
-              slotProps={{ primary: { sx: { fontSize: 13 } } }}
-            />
+              sx={{
+                fontSize: 13,
+                lineHeight: 1.45,
+                py: 0.75,
+                pr: 1.5,
+                pl: 1 + (depth + 1) * 2.5 + 3,
+                "&:not(:last-of-type)": { borderBottom: 1, borderColor: "divider" },
+              }}
+            >
+              {line}
+            </Typography>
           ))}
-        </List>
+        </Box>
       )}
     </>
+  );
+
+  if (depth === 0) {
+    return (
+      <Paper variant="outlined" sx={{ mb: 1.5, overflow: "hidden" }}>
+        {body}
+      </Paper>
+    );
+  }
+  if (depth === 1) {
+    return <Box sx={{ "&:not(:first-of-type)": { borderTop: 1, borderColor: "divider" } }}>{body}</Box>;
+  }
+  return body;
+}
+
+/** Top-level tree nodes, each rendered as its own card. */
+export function TreeList({ tree }: { tree: TreeNode[] }) {
+  return (
+    <Box>
+      {tree.map((node, idx) => (
+        <TreeNodeRow key={node.label + idx} node={node} depth={0} />
+      ))}
+    </Box>
   );
 }
 
@@ -208,11 +269,7 @@ export function TreeView({
           No data for the selected parameters.
         </Typography>
       ) : (
-        <List disablePadding dense sx={{ border: 1, borderColor: "divider", borderRadius: 1, py: 0.5 }}>
-          {tree.map((node, idx) => (
-            <TreeNodeRow key={node.label + idx} node={node} depth={0} />
-          ))}
-        </List>
+        <TreeList tree={tree} />
       )}
     </Box>
   );
