@@ -307,11 +307,19 @@ function EditCell({
 }) {
   if (col.type === "select" || col.type === "boolean") {
     const entries = optionEntries(col.options);
+    // The Select is keyed by label, so map the stored value back to its label.
+    // Boolean options must also match SQLite's 1/0, which is how the API
+    // returns bool columns.
+    const selected = entries.find(([, dbValue]) =>
+      typeof dbValue === "boolean" && value !== "" && value != null
+        ? Boolean(Number(value)) === dbValue
+        : dbValue === value,
+    );
     return (
       <Select
         size="small"
         fullWidth
-        value={String(value ?? "")}
+        value={selected ? selected[0] : ""}
         onChange={(e) => {
           const entry = entries.find(([label]) => label === e.target.value);
           onCommit(entry ? entry[1] : e.target.value);
